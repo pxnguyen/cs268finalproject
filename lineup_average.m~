@@ -1,0 +1,37 @@
+function [res, predicted_values]=lineup_average(names, teams, positions, salary, fantasypoint, opts)
+% with the provided information, return the average lineup
+% strategy: get the average salary, B/8, get the guys with the best project
+% fantasy points at the price salary
+% predicted
+salaryPerPlayer = opts.salarycap/8;
+avail = true(length(names), 1); % the available players
+res = cell(8, 1);
+for iPos = 1:length(opts.positions)
+  tofill = opts.positions{iPos};
+  switch tofill
+    case 'PG'
+    case 'SG'
+    case 'SF'
+    case 'PF'
+    case 'C'
+    case 'G'
+      fitpg = strcmp('PG', positions);
+      fitsg = strcmp('SG', positions);
+      fitpos = fitpg | fitsg;
+    case 'F'
+      fitsf = strcmp('SF', positions);
+      fitpf = strcmp('PF', positions);
+      fitpos = fitsf | fitpf;
+    case 'Util'
+      fitpos = true(length(positions), 1);
+    otherwise
+      fitpos = strcmp(tofill, positions);
+  end
+  fitsalary = salary < salaryPerPlayer;
+  fitIndeces = find(fitpos & fitsalary & avail);
+  [~, imax] = max(fantasypoint(fitIndeces));
+  bestfit = fitIndeces(imax);
+  avail(bestfit) = false; % take the player out
+  res{iPos} = names(bestfit);
+end
+end
