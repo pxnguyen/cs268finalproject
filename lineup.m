@@ -1,8 +1,10 @@
-function results=lineup(opts)
+function results=lineup(varargin)
 % the valid results must have a PG, SG, SF, PF, C, G, F, Util.
 opts.strategy = 'average';
 opts.salarycap = 50000.00;
 opts.positions = {'PG', 'SG', 'SF', 'PF', 'C', 'G', 'F', 'Util'};
+opts.debug = false;
+opts = vl_argparse(opts, varargin);
 
 % -------
 % loading the player stats
@@ -32,7 +34,12 @@ for day=2:nDay
   history = {};
   history.salary = salary(:, 1:day);
   history.fantasypoint = fantasypoint(:, 1:day-1);
-  res = lineup_average(info, history, salary(:,day), avail, opts);
+  switch opts.strategy
+    case 'average'
+      res = lineup_average(info, history, salary(:,day), avail, opts);
+    case 'big3'
+      res = lineup_big3(info, history, salary(:,day), avail, opts);
+  end
   
   % TODO: check to see if lineup is valid
   line_all{day} = res;
