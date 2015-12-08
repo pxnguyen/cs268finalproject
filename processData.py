@@ -40,10 +40,8 @@ with open(inputfile, 'r') as csvinput:
             playerDict[name] = p
         p.history.append(stat)
         dates.append(date)
-    pdb.set_trace()
 
-dates = ['20151120', '20151121', '20151122', '20151123', '20151124', '20151125'\
-        , '20151127', '20151128', '20151129', '20151130']
+dates = sorted(list(set(dates)))
 
 # outputing to the new csv
 with open(outputfile, 'w') as csvoutput:

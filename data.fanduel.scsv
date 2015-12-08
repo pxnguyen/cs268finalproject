@@ -630,7 +630,6 @@ Date;GID;Pos;Name;Starter;FD Pts;FD Salary;Team;H/A;Oppt;Team Score;Oppt Score;M
 20151203;4687;C;Whittington, Shayne;;0;$3,500;ind;A;por;111;123;NA;
 20151203;4681;C;Nurkic, Jusuf;;0;$4,000;den;A;tor;106;105;NA;
 20151203;4497;C;Valanciunas, Jonas;;0;$5,700;tor;H;den;105;106;NA;
-
 20151202;4369;PG;Jackson, Reggie;1;60.6;$7,400;det;H;pho;127;122;39.93;34pt 3rb 16as 1st 3to 3trey 12-20fg 7-7ft
 20151202;4321;PG;Wall, John;1;57.9;$8,100;was;H;lal;104;108;36.32;34pt 7rb 11as 2st 5to 3trey 11-19fg 9-12ft
 20151202;4224;SG;Harden, James;1;49;$10,800;hou;H;nor;108;101;37.67;24pt 10rb 6as 1st 1bl 1trey 7-20fg 9-10ft
@@ -3460,7 +3459,6 @@ Date;GID;Pos;Name;Starter;FD Pts;FD Salary;Team;H/A;Oppt;Team Score;Oppt Score;M
 20151120;3520;C;Bonner, Matt;;0;$3,500;sas;A;nor;90;104;NA;
 20151120;4114;C;McGee, JaVale;;0;$3,700;dal;H;uta;102;93;NA;
 20151120;4521;C;Leonard, Meyers;;0;$4,400;por;H;lac;102;91;NA;
-Date;GID;Pos;Name;Starter;FD Pts;FD Salary;Team;H/A;Oppt;Team Score;Oppt Score;Minutes;Stat line
 20151119;4173;PG;Curry, Stephen;1;58.2;$11,000;gsw;A;lac;124;117;36.77;40pt 11rb 4as 3st 7to 6trey 11-22fg 12-12ft
 20151119;3786;PG;Paul, Chris;1;54.8;$8,900;lac;H;gsw;117;124;31.50;35pt 4rb 8as 3st 3to 5trey 13-22fg 4-4ft
 20151119;3872;PG;Rondo, Rajon;1;50.8;$7,600;sac;A;mia;109;116;40.30;14pt 9rb 18as 1st 3to 2trey 6-13fg
@@ -4036,7 +4034,7 @@ Date;GID;Pos;Name;Starter;FD Pts;FD Salary;Team;H/A;Oppt;Team Score;Oppt Score;M
 20151117;3556;C;Perkins, Kendrick;;0;$3,500;nor;H;den;98;115;NA;
 20151117;4681;C;Nurkic, Jusuf;;0;$4,000;den;A;nor;115;98;NA;
 20151117;3397;C;Andersen, Chris;;0;$3,500;mia;H;min;91;103;NA;
-20151117;4116;C;Pekovic, Nikola;;0;$4,800;min;A;mia;103;91;NA
+20151117;4116;C;Pekovic, Nikola;;0;$4,800;min;A;mia;103;91;NA;
 20151116;4382;PG;Knight, Brandon;1;70.5;$6,900;pho;H;lal;120;101;40.78;30pt 10rb 15as 4st 2to 3trey 11-23fg 5-7ft
 20151116;4079;PG;Westbrook, Russell;1;63.8;$11,400;okc;A;mem;114;122;38.53;40pt 4rb 14as 3st 8to 5trey 13-19fg 9-13ft
 20151116;4523;PG;Lillard, Damian;1;45.4;$9,100;por;A;sas;80;93;41.97;27pt 7rb 6as 1st 1bl 3to 1trey 10-21fg 6-6ft
