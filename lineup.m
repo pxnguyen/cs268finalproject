@@ -1,9 +1,9 @@
 function results=lineup(varargin)
 % the valid results must have a PG, SG, SF, PF, C, G, F, Util.
-opts.strategy = 'average';
+opts.strategy = 'SA';
 opts.salarycap = 50000.00;
 opts.positions = {'PG', 'SG', 'SF', 'PF', 'C', 'G', 'F', 'Util'};
-opts.debug = false;
+opts.debug = true;
 opts = vl_argparse(opts, varargin);
 
 % -------
@@ -17,10 +17,12 @@ info = {};
 info.names = output{1};
 info.teams = output{2};
 info.positions = output{3};
+unique(info.positions)
 salary = cat(2, output{4:2:end});
 salary = cell2mat(cellfun(@(x) str2double(x(2:end)), salary, 'UniformOutput', false));
 fp = cat(2, output{5:2:end});
 fantasypoint = cell2mat(cellfun(@(x) str2double(x), fp, 'UniformOutput', false));
+
 
 nDay = size(salary, 2);
 
@@ -39,6 +41,8 @@ for day=2:nDay
       res = lineup_average(info, history, salary(:,day), avail, opts);
     case 'big3'
       res = lineup_big3(info, history, salary(:,day), avail, opts);
+    case 'SA'
+      res = lineup_SA(info, history, salary(:,day), avail, opts);
   end
   
   % TODO: check to see if lineup is valid
@@ -51,7 +55,7 @@ for day=2:nDay
   pfp_all(day-1) = sum(fp_projection(indeces));
   afp_all(day-1) = sum(fantasypoint(indeces, day));
 end
-
+line_all
 results = {};
 results.totalsalary_all = totalsalary_all;
 results.pfp_all = pfp_all;
