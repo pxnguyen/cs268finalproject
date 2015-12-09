@@ -39,6 +39,8 @@ for day=2:nDay
       res = lineup_average(info, history, salary(:,day), avail, opts);
     case 'big3'
       res = lineup_big3(info, history, salary(:,day), avail, opts);
+    case 'lineup_adhoc'
+      res=lineup_adhoc(info, history, salary(:,day), avail, opts);
   end
   
   % TODO: check to see if lineup is valid
