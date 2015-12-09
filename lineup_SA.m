@@ -5,8 +5,41 @@ function res=lineup_SA(info, history, salary, avail, opts)
     names = info.names(avail);
     
     pkg.positions = info.positions(avail);
-    %a=unique(pkg.positions,'stable')
-    %b=cellfun(@(x) sum(ismember(pkg.positions,x)),a,'un',0)
+    
+    pkg.posCand = cell(8,1);% pg sg pf sf c g f util
+    for i=1:length(pkg.positions)
+        pkg.posCand{8} = [pkg.posCand{8}, i];
+        switch pkg.positions{i}
+            case 'PG'
+                pkg.posCand{1} = [pkg.posCand{1}, i];
+                pkg.posCand{6} = [pkg.posCand{6}, i];
+            case 'SG'
+                pkg.posCand{2} = [pkg.posCand{2}, i];
+                pkg.posCand{6} = [pkg.posCand{6}, i];
+            case 'PF'
+                pkg.posCand{3} = [pkg.posCand{3}, i];
+                pkg.posCand{7} = [pkg.posCand{7}, i];
+            case 'SF'
+                pkg.posCand{4} = [pkg.posCand{4}, i];
+                pkg.posCand{7} = [pkg.posCand{7}, i];
+            otherwise
+                pkg.posCand{5} = [pkg.posCand{5}, i];
+        end
+    end
+    initial_indices = zeros(8,1);
+    for i=1:8
+        isOK = false;
+        while(~isOK)
+            tmpID = pkg.posCand{i}(ceil(rand(1) * length(pkg.posCand{i})));
+            if ~ismember(tmpID, initial_indices)
+                initial_indices(i) = tmpID;
+                isOK = true;
+            end
+%             fprintf('%s-%s-%d\n', names{tmpID}, pkg.positions{tmpID},tmpID);
+        end
+    end
+    
+    
     fp_projection = history.fantasypoint;
     fp_projection(isnan(fp_projection)) = 0;
     total = sum(fp_projection, 2);
@@ -26,26 +59,29 @@ function res=lineup_SA(info, history, salary, avail, opts)
     
     pkg.availN = length(avail);
 
-    pkg.coolRate = 0.95;
+    pkg.coolRate = 0.96;
+    pkg.Tmin = 1;
     
-    initial_indices = 1:1:8;
-    xRes = sA(initial_indices, pkg.maxFP, 1, 0, pkg);
+    xRes = sA(initial_indices, pkg);
     res = names(xRes);
+%     pkg.positions(xRes)
 end
 
-function [xNew] = sA(xOld, Tmax, epsDeltaT, Tmin,  pkg)
-    T = Tmax;
+function [xNew] = sA(xOld, pkg)
+    T = pkg.maxFP;
     step = 0;
     delta = 10;
     counter = 0;
-    while (delta > epsDeltaT && T > Tmin && counter<10)
-        counter = counter + 1
-        energyVal(xOld, pkg)
+    while (T > pkg.Tmin)% && counter<100)
+        
+        fprintf('---SA---\n');
+        counter = counter + 1;
         xNew = acceptN(xOld, T, 10, pkg);
         T = T * pkg.coolRate;
         step = step + 1;
         
         delta = abs(energyVal(xOld, pkg)-energyVal(xNew, pkg));
+        fprintf('counter:%d--energy:%f--T:%f\n',counter,energyVal(xNew, pkg),T)
         xOld = xNew;
         
     end
@@ -87,7 +123,6 @@ function [xNew] = flip(xOld, pkg)
         posOK = (pgCnt>=1 && sgCnt>=1 && pfCnt>=1 && sfCnt>=1 && cCnt>=1 && gCnt>=3 && fCnt>=3);
 %         posOK
         
-        %fprintf('------\n');
         isOK = posOK && costOK;
         
    end
@@ -109,6 +144,8 @@ function [xNew] = flipOne(xOld, pkg)
    xNew = xOld;
 end
 function [x] = acceptN(xOld, T, innerIter, pkg)
+
+        fprintf('---accN---\n');
     for k = 1:innerIter
         xNew = flip(xOld, pkg);
         deltaE = energyVal(xOld, pkg) - energyVal(xNew, pkg);
@@ -132,5 +169,4 @@ function [v] = energyVal(x, pkg)
     end
     v = pkg.maxFP - v;
 end
-
 

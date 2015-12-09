@@ -65,7 +65,7 @@ results.line_all = line_all;
 % plotting
 if opts.debug
   close all;
-  plot(results.pfp_all, 'LineWidth', 5); hold on;
+  plot(results.pfp_all, 'LineWidth', 1); hold on;
   plot(results.afp_all, 'LineWidth', 5);
   grid on;
   legend('projected', 'actual');
