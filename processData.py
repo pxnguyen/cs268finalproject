@@ -14,11 +14,12 @@ class Player():
         self.history = []
 
 class Stat():
-    def __init__(self, date, salary, fantasypoint, stats):
+    def __init__(self, date, salary, fantasypoint, stats, minute):
         self.date = date
         self.salary = salary
         self.fantasypoint = fantasypoint
         self.statline = stats
+        self.minute = minute
 
     def __str__(self):
         return '{0} {1} {2}'.format(self.salary, self.fantasypoint, self.statline)
@@ -32,7 +33,7 @@ with open(inputfile, 'r') as csvinput:
                 opptscore, minute, stats] = row
 
         fantasypoint = float(fantasypoint)
-        stat = Stat(date, salary, fantasypoint, stats)
+        stat = Stat(date, salary, fantasypoint, stats, minute)
         if name in playerDict:
             p = playerDict[name]
         else:
@@ -40,10 +41,8 @@ with open(inputfile, 'r') as csvinput:
             playerDict[name] = p
         p.history.append(stat)
         dates.append(date)
-    pdb.set_trace()
 
-dates = ['20151120', '20151121', '20151122', '20151123', '20151124', '20151125'\
-        , '20151127', '20151128', '20151129', '20151130']
+dates = sorted(list(set(dates)))
 
 # outputing to the new csv
 with open(outputfile, 'w') as csvoutput:
@@ -56,8 +55,13 @@ with open(outputfile, 'w') as csvoutput:
             hist = filter(lambda h:h.date==d, p.history)
             if hist:
                 hist = hist[0]
-                playerhistory += [hist.salary, hist.fantasypoint]
+                if hist.minute == 'NA' or hist.minute == 'DNP':
+                    playerhistory += ['NaN', 'NaN']
+                else:
+                    playerhistory += [hist.salary, hist.fantasypoint]
             else:
                 playerhistory += ['NaN', 'NaN']
         row = playerinfo + playerhistory
+        print len(row)
         writer.writerow(row)
+
