@@ -51,6 +51,8 @@ for iDay=1:length(dayToTest)
       res = lineup_big3(info, history, salary(:,day), fp_projection, avail, opts);
     case 'lineup_adhoc'
       res=lineup_adhoc(info, history, salary(:,day), avail, opts);
+    case 'lineup_SA'
+      res=lineup_SA(info, history, salary(:,day), avail, opts);
   end
 
   % TODO: check to see if lineup is valid
