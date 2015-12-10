@@ -49,8 +49,10 @@ for iDay=1:length(dayToTest)
       res = lineup_average(info, history, salary(:,day), avail, opts);
     case 'big3'
       res = lineup_big3(info, history, salary(:,day), fp_projection, avail, opts);
+    case 'lineup_adhoc'
+      res=lineup_adhoc(info, history, salary(:,day), avail, opts);
   end
-  
+
   % TODO: check to see if lineup is valid
   line_all{iDay} = res;
   indeces = cellfun(@(x) find(strcmp(x, info.names)), res);
