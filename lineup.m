@@ -1,18 +1,21 @@
 function results=lineup(varargin)
 % the valid results must have a PG, SG, SF, PF, C, G, F, Util.
-opts.strategy = 'lineup_SA';
+opts.strategy = 'SA';
 opts.projectionMethod = 'average';
+opts.startTestDay = 10;
 opts.salarycap = 50000.00;
 opts.positions = {'PG', 'SG', 'SF', 'PF', 'C', 'G', 'F', 'Util'};
 opts.debug = true;
+opts.dataset = 'fanduel';
 opts = vl_argparse(opts, varargin);
 
 % -------
 % loading the player stats
 % -------
 
-fid = fopen('data.fanduel.formatted.scsv');
-fmt = repmat('%s', [1, 71]);
+dataname = sprintf('data.%s.formatted.scsv', opts.dataset);
+fid = fopen(dataname);
+fmt = repmat('%s', [1, 117]);
 output = textscan(fid, fmt, 'delimiter', ';');
 info = {};
 info.names = output{1};
@@ -28,13 +31,13 @@ minutes = cell2mat(cellfun(@(x) str2double(x), minutes, 'UniformOutput', false))
 nDay = size(salary, 2);
 
 % picking the line up
-dayToTest = 10:nDay;
+dayToTest = opts.startTestDay:nDay;
 nTestDay = length(dayToTest);
 line_all = cell(nTestDay, 1);
 pfp_all = zeros(nTestDay, 1); % projected fp
 afp_all = zeros(nTestDay, 1); % actual fp
 totalsalary_all = zeros(nTestDay, 1);
-for iDay=1:length(dayToTest)
+parfor iDay=1:length(dayToTest)
   day= dayToTest(iDay);
   avail = ~isnan(salary(:,day)) & ~isnan(fantasypoint(:,day));
   history = {};
@@ -46,13 +49,13 @@ for iDay=1:length(dayToTest)
   fp_projection = project(history.fantasypoint, history.minutes, projopts);
   switch opts.strategy
     case 'average'
-      res = lineup_average(info, history, salary(:,day), avail, opts);
+      res = lineup_average(info, history, salary(:,day), fp_projection, avail, opts);
     case 'big3'
       res = lineup_big3(info, history, salary(:,day), fp_projection, avail, opts);
-    case 'lineup_adhoc'
-      res=lineup_adhoc(info, history, salary(:,day), avail, opts);
-    case 'lineup_SA'
-      res=lineup_SA(info, history, salary(:,day), fp_projection, avail, opts);
+    case 'adhoc'
+      res = lineup_adhoc(info, history, salary(:,day), fp_projection, avail, opts);
+    case 'SA'
+      res = lineup_SA(info, history, salary(:,day), fp_projection, avail, opts);
   end
 
   % TODO: check to see if lineup is valid

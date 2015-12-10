@@ -1,17 +1,18 @@
-function res=lineup_average(info, history, salary, avail, opts)
+function res=lineup_average(info, history, salary, pfp, avail, opts)
 % with the provided information, return the average lineup
 % strategy: get the average salary, B/8, get the guys with the best project
 % fantasy points at the price salary
-% predicted_values: the predicted total fantasy points for this team
-names = info.names;
-positions = info.positions;
-% salary = history.salary(:, end);
-% fantasypoint = history.fantasypoint;
-% fp_projection = history.fantasypoint;
-% fp_projection(isnan(fp_projection)) = 0;
-% fp_projection = mean(fp_projection, 2);
-salaryPerPlayer = opts.salarycap/8;
 res = cell(8, 1);
+
+salaryPerPlayer = opts.salarycap/8;
+
+names = info.names(avail);
+positions = info.positions(avail);
+playerAvailable = avail(avail);
+
+pfp = pfp(avail);
+salary = salary(avail);
+
 for iPos = 1:length(opts.positions)
   tofill = opts.positions{iPos};
   switch tofill
@@ -29,10 +30,10 @@ for iPos = 1:length(opts.positions)
       fitpos = strcmp(tofill, positions);
   end
   fitsalary = salary <= salaryPerPlayer;
-  fitIndeces = find(fitpos & fitsalary & avail);
-  [~, imax] = max(salary(fitIndeces));
+  fitIndeces = find(fitpos & fitsalary);
+  [~, imax] = max(pfp(fitIndeces));
   bestfit = fitIndeces(imax);
-  avail(bestfit) = false; % take the player out
+  playerAvailable(bestfit) = false; % take the player out
   res{iPos} = names{bestfit};
 end
 end
