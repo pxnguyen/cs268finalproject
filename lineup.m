@@ -1,6 +1,6 @@
 function results=lineup(varargin)
 % the valid results must have a PG, SG, SF, PF, C, G, F, Util.
-opts.strategy = 'lineup_SA';
+opts.strategy = 'lineup_adhoc';
 opts.projectionMethod = 'average';
 opts.startTestDay = 15;
 opts.salarycap = 50000.00;

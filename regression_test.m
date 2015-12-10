@@ -16,17 +16,20 @@ errorsTop50 = zeros(length(windowSize), 1);
 errorsAll = zeros(length(windowSize), 1);
 
 maxDay = size(fantasypoint, 2);
-daysToTest = 16:maxDay;
+daysToTest = 20:maxDay;
 gt = fantasypoint(:,daysToTest);
 
 % sweep for regression parameter
-for windowSize = 1:5;
+for windowSize = 1:10;
   predicted = zeros(size(gt));
   daysToPredict = daysToTest;
   for iDay=1:length(daysToPredict)
     history = fantasypoint(:, 1:daysToPredict(iDay)-1);
     minHist = minutes(:, 1:daysToPredict(iDay)-1);
-    predicted(:,iDay) = project(history, 'regression', minHist, windowSize);
+    opts = struct;
+    opts.method = 'regression';
+    opts.windowSize = windowSize;
+    predicted(:,iDay) = project(history, minHist, opts);
   end
   
   % top 100
@@ -53,5 +56,6 @@ for windowSize = 1:5;
   errorsAll(windowSize) = mean(avgErrorPerDay);
 end
 
+plot(1:10, errorsTop50, '-o', 'LineWidth', 2); hold on;
 errorsTop50
 errorsAll

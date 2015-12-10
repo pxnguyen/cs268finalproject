@@ -1,6 +1,6 @@
 function compare_projection
 fid = fopen('data.fanduel.formatted.scsv');
-fmt = repmat('%s', [1, 105]);
+fmt = repmat('%s', [1, 117]);
 output = textscan(fid, fmt, 'delimiter', ';');
 info = {};
 info.names = output{1};
@@ -17,7 +17,7 @@ errorsAll = zeros(length(methods), 1);
 methodPrediction = cell(length(methods), 1);
 
 maxDay = size(fantasypoint, 2);
-daysToTest = 16:maxDay;
+daysToTest = 20:maxDay;
 gt = fantasypoint(:,daysToTest);
 
 for iMethod = 1:length(methods)
@@ -80,3 +80,5 @@ if false
 end
 
 fprintf('Results\n');
+errorsAll
+errorsTop50

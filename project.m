@@ -3,7 +3,7 @@ function projected=project(history, minutes, varargin)
 % % history: array of fantasy points
 opts.weightType = 'uniform';
 opts.method = 'average';
-opts.windowSize = 2;
+opts.windowSize = 3;
 opts = vl_argparse(opts, varargin);
 
 if nargin < 3
