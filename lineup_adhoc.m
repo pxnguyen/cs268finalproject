@@ -19,36 +19,55 @@ sal=salary;      % last day salary of all players
 % end
 % fantasy_project=project(history.fantasypoint,opts.projectionMethod,'quadratic');
 
-fantasy_project(isnan(fantasy_project))=0;  % removing all the Nan values if any
-sal(isnan(sal))=0;                          % removing all the Nan values if any
+%fantasy_project(isnan(fantasy_project))=0;  % removing all the Nan values if any
+%sal(isnan(sal))=0;                          % removing all the Nan values if any
+
+pfp = fantasy_project(avail);
+sal = salary(avail);
+names = info.names(avail);
+positions = info.positions(avail);
 
 myavail=find(avail==1); % the available players from which to select
+nPlayer = length(myavail);
 
 %optimization
 % trying to find the global minimum by restarting with different intial point.
 for k=1:3
-fun = @(x)-(fantasy_project(myavail(floor(x(1))))+fantasy_project(myavail(floor(x(2))))+fantasy_project(myavail(floor(x(3))))...
-    +fantasy_project(myavail(floor(x(4))))+fantasy_project(myavail(floor(x(5))))+fantasy_project(myavail(floor(x(6))))...
-    +fantasy_project(myavail(floor(x(7))))+fantasy_project(myavail(floor(x(8))))); % obj function
+fun = -pfp;
 
-A = [-1,1,0,0,0,0,0,0;0,0,-1,1,0,0,0,0;0,0,0,0,-1,1,0,0;0,0,0,0,0,0,-1,1];
-b = [-50;-50;-50;-50];
-x0 = randi(length(myavail),[8,1])'; % intial points
-lb = ones(1,8);                     % lower bounds
-ub = length(myavail)*ones(1,8);     % upper bounds
-    
-options = optimoptions('fmincon','InitBarrierParam',500,'Hessian','lbfgs'); % setting options
-[x,fval] = fmincon(fun,x0,A,b,[],[],lb,ub,[],options);
+%fun = @(x)-(fantasy_project(myavail(floor(x(1))))+fantasy_project(myavail(floor(x(2))))+fantasy_project(myavail(floor(x(3))))...
+%    +fantasy_project(myavail(floor(x(4))))+fantasy_project(myavail(floor(x(5))))+fantasy_project(myavail(floor(x(6))))...
+%    +fantasy_project(myavail(floor(x(7))))+fantasy_project(myavail(floor(x(8))))); % obj function
+
+A = sal;
+b = opts.salarycap;
+
+Aeq = ones(1, nPlayer);
+beq = 8;
+
+lb = zeros(nPlayer, 1);                     % lower bounds
+ub = ones(nPlayer, 1);                     % lower bounds
+
+intcon = 1:nPlayer;
+
+keyboard
+candidates = intlinprog(fun,intcon,A,b,Aeq,beq,lb,ub);
+
+%options = optimoptions('fmincon','InitBarrierParam',500,'Hessian','lbfgs'); % setting options
+%[x,fval] = fmincon(fun,x0,A,b,[],[],lb,ub,[],options);
 
 % options = optimoptions('fmincon','Display','iter','InitBarrierParam',50,'Hessian','lbfgs'); % setting options
 
-while(sum(sal(myavail(floor(x))))>opts.salarycap)
-    x0=x;
-    options = optimoptions('fmincon','InitBarrierParam',500,'Hessian','lbfgs'); % setting options
-    [x,fval] = fmincon(fun,x0,A,b,[],[],lb,ub,[],options);
-end
+%while(sum(sal(myavail(floor(x))))>opts.salarycap)
+ %   x0=x;
+  %  options = optimoptions('fmincon','InitBarrierParam',500,'Hessian','lbfgs'); % setting options
+   % [x,fval] = fmincon(fun,x0,A,b,[],[],lb,ub,[],options);
+%end
 
-iter(k,:)=[abs(fval),x(1:8)]; % different intial point
+%iter(k,:)=[abs(fval),x(1:8)]; % different intial point
+
+names(candidates > 0) % names of the players
+sum(pfp(candidates > 0)) % current total
 end
 
 [~,indices]=sort(iter(:,1),'descend');
