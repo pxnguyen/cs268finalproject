@@ -14,6 +14,6 @@ outputfile = 'data.draftkings.scsv'
 with open(outputfile, 'w') as file:
 	for i in (range(1, 31)):
 		getData(11, i, file)
-	for i in (range(1, 9)):
+	for i in (range(1, 10)):
 		getData(12, i, file)
 
