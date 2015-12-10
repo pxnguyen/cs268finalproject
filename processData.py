@@ -1,8 +1,8 @@
 # this file process the data files into the regular csv file
 import csv
 import pdb
-inputfile = 'data.fanduel.scsv'
-outputfile = 'data.fanduel.formatted.scsv'
+inputfile = 'data.draftkings.scsv'
+outputfile = 'data.draftkings.formatted.scsv'
 
 playerDict = {}
 
