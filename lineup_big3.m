@@ -1,4 +1,4 @@
-function res=lineup_big3(info, history, salary, avail, opts)
+function res=lineup_big3(info, history, salary, fp_projection, avail, opts)
 % with the provided information, return the average lineup
 % strategy: get the big 3 players, share the average
 res = cell(8, 1);
@@ -6,13 +6,7 @@ names = info.names(avail);
 positions = info.positions(avail);
 playerAvailable = avail(avail);
 
-fp_projection = history.fantasypoint;
-fp_projection(isnan(fp_projection)) = 0;
-total = sum(fp_projection, 2);
-playCount = sum(fp_projection~=0, 2);
-fp_projection = total ./ (playCount +eps);
 pfp = fp_projection(avail);
-% fp_projection = fp_projection(:,end); % average projection
 salary = salary(avail);
 values = (pfp * 1000) ./ (salary+eps);
 % fp_projection = mean(fp_projection, 2); % average projection

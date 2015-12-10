@@ -1,9 +1,10 @@
 function results=lineup(varargin)
 % the valid results must have a PG, SG, SF, PF, C, G, F, Util.
-opts.strategy = 'average';
+opts.strategy = 'lineup_SA';
+opts.projectionMethod = 'average';
 opts.salarycap = 50000.00;
 opts.positions = {'PG', 'SG', 'SF', 'PF', 'C', 'G', 'F', 'Util'};
-opts.debug = false;
+opts.debug = true;
 opts = vl_argparse(opts, varargin);
 
 % -------
@@ -11,45 +12,55 @@ opts = vl_argparse(opts, varargin);
 % -------
 
 fid = fopen('data.fanduel.formatted.scsv');
-fmt = repmat('%s', [1, 23]);
+fmt = repmat('%s', [1, 71]);
 output = textscan(fid, fmt, 'delimiter', ';');
 info = {};
 info.names = output{1};
 info.teams = output{2};
 info.positions = output{3};
-salary = cat(2, output{4:2:end});
+salary = cat(2, output{4:3:end});
+fp = cat(2, output{5:3:end});
+minutes = cat(2, output{6:3:end});
 salary = cell2mat(cellfun(@(x) str2double(x(2:end)), salary, 'UniformOutput', false));
-fp = cat(2, output{5:2:end});
 fantasypoint = cell2mat(cellfun(@(x) str2double(x), fp, 'UniformOutput', false));
+minutes = cell2mat(cellfun(@(x) str2double(x), minutes, 'UniformOutput', false));
 
 nDay = size(salary, 2);
 
 % picking the line up
-line_all = cell(nDay-1, 1);
-pfp_all = zeros(nDay-1, 1); % projected fp
-afp_all = zeros(nDay-1, 1); % actual fp
-totalsalary_all = zeros(nDay-1, 1);
-for day=2:nDay
+dayToTest = 10:nDay;
+nTestDay = length(dayToTest);
+line_all = cell(nTestDay, 1);
+pfp_all = zeros(nTestDay, 1); % projected fp
+afp_all = zeros(nTestDay, 1); % actual fp
+totalsalary_all = zeros(nTestDay, 1);
+for iDay=1:length(dayToTest)
+  day= dayToTest(iDay);
   avail = ~isnan(salary(:,day)) & ~isnan(fantasypoint(:,day));
   history = {};
   history.salary = salary(:, 1:day);
   history.fantasypoint = fantasypoint(:, 1:day-1);
+  history.minutes = minutes(:, 1:day-1);
+  projopts = struct;
+  projopts.method = opts.projectionMethod;
+  fp_projection = project(history.fantasypoint, history.minutes, projopts);
   switch opts.strategy
     case 'average'
       res = lineup_average(info, history, salary(:,day), avail, opts);
     case 'big3'
-      res = lineup_big3(info, history, salary(:,day), avail, opts);
+      res = lineup_big3(info, history, salary(:,day), fp_projection, avail, opts);
+    case 'lineup_adhoc'
+      res=lineup_adhoc(info, history, salary(:,day), avail, opts);
+    case 'lineup_SA'
+      res=lineup_SA(info, history, salary(:,day), fp_projection, avail, opts);
   end
-  
+
   % TODO: check to see if lineup is valid
-  line_all{day} = res;
-  fp_projection = history.fantasypoint;
-  fp_projection(isnan(fp_projection)) = 0;
-  fp_projection = mean(fp_projection, 2);
+  line_all{iDay} = res;
   indeces = cellfun(@(x) find(strcmp(x, info.names)), res);
-  totalsalary_all(day-1) = sum(salary(indeces, day));
-  pfp_all(day-1) = sum(fp_projection(indeces));
-  afp_all(day-1) = sum(fantasypoint(indeces, day));
+  totalsalary_all(iDay) = sum(salary(indeces, day));
+  pfp_all(iDay) = sum(fp_projection(indeces));
+  afp_all(iDay) = sum(fantasypoint(indeces, day));
 end
 
 results = {};
