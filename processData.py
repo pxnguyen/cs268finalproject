@@ -56,12 +56,12 @@ with open(outputfile, 'w') as csvoutput:
             if hist:
                 hist = hist[0]
                 if hist.minute == 'NA' or hist.minute == 'DNP':
-                    playerhistory += ['NaN', 'NaN']
+                    playerhistory += ['NaN', 'NaN', 'NaN']
                 else:
-                    playerhistory += [hist.salary, hist.fantasypoint]
+                    playerhistory += [hist.salary, hist.fantasypoint, hist.minute]
             else:
-                playerhistory += ['NaN', 'NaN']
+                playerhistory += ['NaN', 'NaN', 'NaN']
         row = playerinfo + playerhistory
-        print len(row)
+        print(len(row))
         writer.writerow(row)
 

@@ -1,6 +1,6 @@
 %% comparing the methods
-projectionMethods = {'average', 'last'};
-pickingStrategy = {'average', 'big3'};
+projectionMethods = {'average', 'last', 'regression'};
+pickingStrategy = {'big3'};
 
 resultsSet = cell(length(pickingStrategy), length(projectionMethods));
 for iStrat = 1:length(pickingStrategy)
