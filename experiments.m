@@ -1,17 +1,36 @@
 %% comparing the methods
 projectionMethods = {'average', 'last', 'regression'};
-pickingStrategy = {'average', 'big3', 'lineup_SA'};
-% pickingStrategy = {'average', 'big3','lineup_adhoc', 'lineup_SA'};
+pickingStrategy = {'average', 'big3', 'SA'};
 
+opts = struct;
+opts.startTestDay = 20;
+
+%% fanduel
 resultsSet = cell(length(pickingStrategy), length(projectionMethods));
 for iStrat = 1:length(pickingStrategy)
   iStrat
   for iProj=1:length(projectionMethods)
-    resname = sprintf('results/%s-%s.mat', projectionMethods{iProj}, pickingStrategy{iStrat});
+    resname = sprintf('results/fanduel-%s-%s.mat', projectionMethods{iProj}, pickingStrategy{iStrat});
     if exist(resname, 'file')
       continue;
     end
-    opts = struct;
+    opts.strategy = pickingStrategy{iStrat};
+    opts.projectionMethod = projectionMethods{iProj};
+    res = lineup(opts);
+    resultsSet{iStrat, iProj} = res;
+    save(resname, 'res');
+  end
+end
+
+%% Draft kings
+resultsSet = cell(length(pickingStrategy), length(projectionMethods));
+for iStrat = 1:length(pickingStrategy)
+  iStrat
+  for iProj=1:length(projectionMethods)
+    resname = sprintf('results/draftkings-%s-%s.mat', projectionMethods{iProj}, pickingStrategy{iStrat});
+    if exist(resname, 'file')
+      continue;
+    end
     opts.strategy = pickingStrategy{iStrat};
     opts.projectionMethod = projectionMethods{iProj};
     res = lineup(opts);

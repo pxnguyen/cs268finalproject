@@ -1,18 +1,20 @@
 function results=lineup(varargin)
 % the valid results must have a PG, SG, SF, PF, C, G, F, Util.
-opts.strategy = 'lineup_adhoc';
+opts.strategy = 'SA';
 opts.projectionMethod = 'average';
-opts.startTestDay = 15;
+opts.startTestDay = 10;
 opts.salarycap = 50000.00;
 opts.positions = {'PG', 'SG', 'SF', 'PF', 'C', 'G', 'F', 'Util'};
 opts.debug = true;
+opts.dataset = 'fanduel';
 opts = vl_argparse(opts, varargin);
 
 % -------
 % loading the player stats
 % -------
 
-fid = fopen('data.fanduel.formatted.scsv');
+dataname = sprintf('data.%s.formatted.scsv', opts.dataset);
+fid = fopen(dataname);
 fmt = repmat('%s', [1, 117]);
 output = textscan(fid, fmt, 'delimiter', ';');
 info = {};
@@ -47,7 +49,7 @@ for iDay=1:length(dayToTest)
   fp_projection = project(history.fantasypoint, history.minutes, projopts);
   switch opts.strategy
     case 'average'
-      res = lineup_average(info, history, salary(:,day), avail, opts);
+      res = lineup_average(info, history, salary(:,day), fp_projection, avail, opts);
     case 'big3'
       res = lineup_big3(info, history, salary(:,day), fp_projection, avail, opts);
     case 'adhoc'
