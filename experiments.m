@@ -1,6 +1,6 @@
 %% comparing the methods
 projectionMethods = {'average', 'last', 'regression'};
-pickingStrategy = {'average', 'big3', 'SA'};
+pickingStrategy = {'average', 'big3', 'adhoc', 'SA'};
 
 opts = struct;
 opts.startTestDay = 20;
@@ -41,6 +41,16 @@ end
 
 %% plotting
 
+for iStrat = 1:length(pickingStrategy)
+  for iProj=1:length(projectionMethods)
+    fprintf('%s-%s', projectionMethods{iProj}, pickingStrategy{iStrat})
+    a = load(sprintf('results/fanduel-%s-%s.mat', projectionMethods{iProj}, pickingStrategy{iStrat}));
+    a = a.res;
+    mean(a.afp_all)
+  end
+end
+
+%%
 for iStrat = 1:length(pickingStrategy)
   for iProj=1:length(projectionMethods)
     fprintf('%s-%s', projectionMethods{iProj}, pickingStrategy{iStrat})
