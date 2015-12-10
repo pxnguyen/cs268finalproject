@@ -1,4 +1,4 @@
- function res=lineup_adhoc(info, history, salary, avail, opts)
+ function res=lineup_adhoc(info, history, salary, fantasy_project, avail, opts)
 % with the provided information, return the lineup wrt to first baseline
 % stratergy: Solve the optimization prb and then use adhoc (manually) correct
 % for wrong for correct position. This uses interior point method
@@ -17,7 +17,7 @@ sal=salary;      % last day salary of all players
 % ids=find(~isnan(history.fantasypoint(i,:)));
 % fantasy_project(i)=mean(history.fantasypoint(i,ids));  % projected fantasy point of all players
 % end
-fantasy_project=project(history.fantasypoint,opts.projectionMethod,'quadratic');
+% fantasy_project=project(history.fantasypoint,opts.projectionMethod,'quadratic');
 
 fantasy_project(isnan(fantasy_project))=0;  % removing all the Nan values if any
 sal(isnan(sal))=0;                          % removing all the Nan values if any
@@ -26,7 +26,7 @@ myavail=find(avail==1); % the available players from which to select
 
 %optimization
 % trying to find the global minimum by restarting with different intial point.
-for k=1:5
+for k=1:3
 fun = @(x)-(fantasy_project(myavail(floor(x(1))))+fantasy_project(myavail(floor(x(2))))+fantasy_project(myavail(floor(x(3))))...
     +fantasy_project(myavail(floor(x(4))))+fantasy_project(myavail(floor(x(5))))+fantasy_project(myavail(floor(x(6))))...
     +fantasy_project(myavail(floor(x(7))))+fantasy_project(myavail(floor(x(8))))); % obj function
@@ -37,14 +37,14 @@ x0 = randi(length(myavail),[8,1])'; % intial points
 lb = ones(1,8);                     % lower bounds
 ub = length(myavail)*ones(1,8);     % upper bounds
     
-options = optimoptions('fmincon','InitBarrierParam',50,'Hessian','lbfgs'); % setting options
+options = optimoptions('fmincon','InitBarrierParam',500,'Hessian','lbfgs'); % setting options
 [x,fval] = fmincon(fun,x0,A,b,[],[],lb,ub,[],options);
 
 % options = optimoptions('fmincon','Display','iter','InitBarrierParam',50,'Hessian','lbfgs'); % setting options
 
 while(sum(sal(myavail(floor(x))))>opts.salarycap)
     x0=x;
-    options = optimoptions('fmincon','InitBarrierParam',50,'Hessian','lbfgs'); % setting options
+    options = optimoptions('fmincon','InitBarrierParam',500,'Hessian','lbfgs'); % setting options
     [x,fval] = fmincon(fun,x0,A,b,[],[],lb,ub,[],options);
 end
 
@@ -117,7 +117,9 @@ for j=1:length(idx)      % replacing the repeating players
    positions=info.positions;
    newplayer=switchPlayer(opts.positions{idx(j)},sal(myavail(extra{j})),myavail,fantasy_project,positions,sal,val);
    if(newplayer==0)
-       res{idx(j)}={'No player at that position playing today'};
+%        res{idx(j)}={'No player at that position playing today'};
+       b=find(strcmp(opts.positions{idx(j)},info.positions(myavail)));
+       res{idx(j)} = info.names(myavail(randi(length(b),1)));
    else
    res{idx(j)}=info.names(newplayer);
    end

@@ -1,6 +1,6 @@
 function results=lineup(varargin)
 % the valid results must have a PG, SG, SF, PF, C, G, F, Util.
-opts.strategy = 'lineup_SA';
+opts.strategy = 'lineup_adhoc';
 opts.projectionMethod = 'average';
 opts.salarycap = 50000.00;
 opts.positions = {'PG', 'SG', 'SF', 'PF', 'C', 'G', 'F', 'Util'};
@@ -50,7 +50,7 @@ for iDay=1:length(dayToTest)
     case 'big3'
       res = lineup_big3(info, history, salary(:,day), fp_projection, avail, opts);
     case 'lineup_adhoc'
-      res=lineup_adhoc(info, history, salary(:,day), avail, opts);
+      res=lineup_adhoc(info, history, salary(:,day),fp_projection, avail, opts);
     case 'lineup_SA'
       res=lineup_SA(info, history, salary(:,day), fp_projection, avail, opts);
   end
