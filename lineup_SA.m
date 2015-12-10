@@ -1,4 +1,4 @@
-function res=lineup_SA(info, history, salary, avail, opts)
+function res=lineup_SA(info, history, salary, fp_projection, avail, opts)
 % with the provided information, return the average lineup
 % strategy: get the big 3 players, share the average
     res = cell(8, 1);
@@ -40,11 +40,11 @@ function res=lineup_SA(info, history, salary, avail, opts)
     end
     
     
-    fp_projection = history.fantasypoint;
-    fp_projection(isnan(fp_projection)) = 0;
-    total = sum(fp_projection, 2);
-    playCount = sum(fp_projection~=0, 2);
-    fp_projection = total ./ (playCount +eps);
+%     fp_projection = history.fantasypoint;
+%     fp_projection(isnan(fp_projection)) = 0;
+%     total = sum(fp_projection, 2);
+%     playCount = sum(fp_projection~=0, 2);
+%     fp_projection = total ./ (playCount +eps);
     pfp = fp_projection(avail);
     % fp_projection = fp_projection(:,end); % average projection
     
@@ -59,8 +59,8 @@ function res=lineup_SA(info, history, salary, avail, opts)
     
     pkg.availN = length(avail);
 
-    pkg.coolRate = 0.96;
-    pkg.Tmin = 1;
+    pkg.coolRate = 0.94;
+    pkg.Tmin = 0.3;
     
     xRes = sA(initial_indices, pkg);
     res = names(xRes);
@@ -74,7 +74,7 @@ function [xNew] = sA(xOld, pkg)
     counter = 0;
     while (T > pkg.Tmin)% && counter<100)
         
-        fprintf('---SA---\n');
+%         fprintf('---SA---\n');
         counter = counter + 1;
         xNew = acceptN(xOld, T, 10, pkg);
         T = T * pkg.coolRate;
@@ -145,7 +145,7 @@ function [xNew] = flipOne(xOld, pkg)
 end
 function [x] = acceptN(xOld, T, innerIter, pkg)
 
-        fprintf('---accN---\n');
+%         fprintf('---accN---\n');
     for k = 1:innerIter
         xNew = flip(xOld, pkg);
         deltaE = energyVal(xOld, pkg) - energyVal(xNew, pkg);
