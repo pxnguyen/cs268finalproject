@@ -59,8 +59,8 @@ function res=lineup_SA(info, history, salary, fp_projection, avail, opts)
     
     pkg.availN = length(avail);
 
-    pkg.coolRate = 0.94;
-    pkg.Tmin = 0.3;
+    pkg.coolRate = 0.99;
+    pkg.Tmin = 5;
     
     xRes = sA(initial_indices, pkg);
     res = names(xRes);

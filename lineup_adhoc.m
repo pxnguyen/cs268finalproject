@@ -9,152 +9,186 @@
 
 res=cell(8,1); % THE ACTUAL LINEUP
 
-sal=salary;      % last day salary of all players
-
-% computing the projected fatansy (using average)
-% fantasy_project=zeros(size(history.fantasypoint,1),1);
-% for i=1:size(history.fantasypoint,1)
-% ids=find(~isnan(history.fantasypoint(i,:)));
-% fantasy_project(i)=mean(history.fantasypoint(i,ids));  % projected fantasy point of all players
-% end
-% fantasy_project=project(history.fantasypoint,opts.projectionMethod,'quadratic');
-
-%fantasy_project(isnan(fantasy_project))=0;  % removing all the Nan values if any
-%sal(isnan(sal))=0;                          % removing all the Nan values if any
-
 pfp = fantasy_project(avail);
-sal = salary(avail);
+salary = salary(avail);
 names = info.names(avail);
 positions = info.positions(avail);
 
 myavail=find(avail==1); % the available players from which to select
 nPlayer = length(myavail);
+playerAvailable = avail(avail);
 
 %optimization
-% trying to find the global minimum by restarting with different intial point.
-for k=1:3
-fun = -pfp;
+nRestart = 1;
+candidateCell = cell(nRestart, 1);
+vals = zeros(nRestart, 1);
+for iRestart = 1:nRestart
+  iRestart
+  fun = -pfp;
 
-%fun = @(x)-(fantasy_project(myavail(floor(x(1))))+fantasy_project(myavail(floor(x(2))))+fantasy_project(myavail(floor(x(3))))...
-%    +fantasy_project(myavail(floor(x(4))))+fantasy_project(myavail(floor(x(5))))+fantasy_project(myavail(floor(x(6))))...
-%    +fantasy_project(myavail(floor(x(7))))+fantasy_project(myavail(floor(x(8))))); % obj function
+  A = salary';
+  b = opts.salarycap;
 
-A = sal;
-b = opts.salarycap;
+  Aeq = ones(1, nPlayer);
+  beq = 8;
 
-Aeq = ones(1, nPlayer);
-beq = 8;
+  lb = zeros(nPlayer, 1);                     % lower bounds
+  ub = ones(nPlayer, 1);                     % lower bounds
 
-lb = zeros(nPlayer, 1);                     % lower bounds
-ub = ones(nPlayer, 1);                     % lower bounds
+  intcon = 1:nPlayer;
 
-intcon = 1:nPlayer;
+  candidates = intlinprog(fun,intcon,A,b,Aeq,beq,lb,ub);
+  candidateCell{iRestart} = candidates;
+  
 
-keyboard
-candidates = intlinprog(fun,intcon,A,b,Aeq,beq,lb,ub);
-
-%options = optimoptions('fmincon','InitBarrierParam',500,'Hessian','lbfgs'); % setting options
-%[x,fval] = fmincon(fun,x0,A,b,[],[],lb,ub,[],options);
-
-% options = optimoptions('fmincon','Display','iter','InitBarrierParam',50,'Hessian','lbfgs'); % setting options
-
-%while(sum(sal(myavail(floor(x))))>opts.salarycap)
- %   x0=x;
-  %  options = optimoptions('fmincon','InitBarrierParam',500,'Hessian','lbfgs'); % setting options
-   % [x,fval] = fmincon(fun,x0,A,b,[],[],lb,ub,[],options);
-%end
-
-%iter(k,:)=[abs(fval),x(1:8)]; % different intial point
-
-names(candidates > 0) % names of the players
-sum(pfp(candidates > 0)) % current total
+  names(candidates > 0) % names of the players
+  vals(iRestart) = sum(pfp(candidates > 0)); % current total
 end
 
-[~,indices]=sort(iter(:,1),'descend');
-x=floor(iter(indices(1),2:end));        % final selection wrt to available players to get kind of global max
-
+[~, imax] = max(vals);
+candidates = candidateCell{imax};
 
 % ---checking the lineup and chosing the best from the above optimization--
 % checking for valid positions in x. This is computed wrt to available players.
 
-[~,b]=sort(fantasy_project(myavail(x)),'descend');
-k=1; % number of repeat players
-
-for j=1:8
-    position=info.positions(myavail(x(b(j))));
-    emptycell=cellfun(@isempty,res);
-    switch position{1}
-        case 'PG'
-            if(emptycell(1)==1)
-                res{1}=info.names(myavail(x(b(j))));
-            else
-                extra{k} = x(b(j));
-                k=k+1;
-            end
-        case 'SG'
-            if(emptycell(2)==1)
-                res{2}=info.names(myavail(x(b(j))));
-            else
-                extra{k} = x(b(j));
-                k=k+1;
-            end
-        case 'SF'
-            if(emptycell(3)==1)
-                res{3}=info.names(myavail(x(b(j))));
-            else
-                extra{k} = x(b(j));
-                k=k+1;
-            end
-        case 'PF'
-            if(emptycell(4)==1)
-                res{4}=info.names(myavail(x(b(j))));
-            else
-                extra{k} = x(b(j));
-                k=k+1;
-            end
-        case 'C'
-            if(emptycell(5)==1)
-                res{5}=info.names(myavail(x(b(j))));
-            else
-                extra{k} = x(b(j));
-                k=k+1;
-            end
+x = find(candidates);
+[~,b]=sort(pfp(x),'descend');
+sortedPlayers = x(b);
+filled = false(length(sortedPlayers), 1);
+for i=1:length(sortedPlayers)
+  player = sortedPlayers(i);
+  
+  % try to put this player into the lineup
+  pos = positions{player};
+  switch pos
+    case 'PG'
+      potential = [1 6 8];
+    case 'SG'
+      potential = [2 6 8];
+    case 'SF'
+      potential = [3 7 8];
+    case 'PF'
+      potential = [4 7 8];
+    case 'C'
+      potential = [5 8];
+  end
+  
+  for pot = potential
+    if isempty(res{pot})
+      res{pot} = names{player};
+      filled(i) = true;
+      playerAvailable(i) = false;
+      break
     end
+  end
 end
 
-%------adding missing players in lineup using same salary-----------------
-emptycell=cellfun(@isempty,res);             
-idx=find(emptycell==1);
-for j=1:length(idx)      % replacing the repeating players
-   it=1;
-   for k=1:8
-       if(~isempty(res{k}))
-           val(it)=find(strcmp(res{k},info.names)==1); % current lineuup in indices
-           it=it+1;
-       end
-   end
-   positions=info.positions;
-   newplayer=switchPlayer(opts.positions{idx(j)},sal(myavail(extra{j})),myavail,fantasy_project,positions,sal,val);
-   if(newplayer==0)
-%        res{idx(j)}={'No player at that position playing today'};
-       b=find(strcmp(opts.positions{idx(j)},info.positions(myavail)));
-       res{idx(j)} = info.names(myavail(randi(length(b),1)));
-   else
-   res{idx(j)}=info.names(newplayer);
-   end
+leftover = sortedPlayers(~filled);
+positions2fill = find(cellfun(@isempty, res));
+
+for iPos = 1:length(positions2fill)
+  tofillIndex = positions2fill(iPos);
+  tofillName = opts.positions{tofillIndex};
+  
+  switch tofillName
+    case 'G'
+      fitpg = strcmp('PG', positions);
+      fitsg = strcmp('SG', positions);
+      fitpos = fitpg | fitsg;
+    case 'F'
+      fitsf = strcmp('SF', positions);
+      fitpf = strcmp('PF', positions);
+      fitpos = fitsf | fitpf;
+    case 'Util'
+      fitpos = true(length(positions), 1);
+    otherwise
+      fitpos = strcmp(tofillName, positions);
+  end
+  
+  toberemoved = leftover(1);
+  oldsalary = salary(toberemoved);
+  
+  newguy = salary <= oldsalary & fitpos & playerAvailable;
+  newguy = find(newguy);
+  [~,imax] = max(pfp(newguy));
+  newguy = newguy(imax);
+  res{tofillIndex} = names{newguy};
+  playerAvailable(newguy) = false;
+  
+  % take the old guy out of the leftover
+  leftover(1) = [];
 end
 
- 
-%-------- cross checking the total projected fantasy points and salary------
-% totalfantasy_project=0;
-% totalsalary=0;
-% for i=1:8
-% val=strcmp(res{i},info.names);
-% totalfantasy_project=totalfantasy_project+fantasy_project(val);
-% totalsalary=totalsalary+sal(val);
-% finalposition{i}=info.positions(val);
+
+% for j=1:8
+%   position=positions(x(b(j)));
+%   emptycell=cellfun(@isempty,res);
+%   p = x(b(j));
+%   switch position{1}
+%     case 'PG'
+%         if(emptycell(1)==1)
+%             res{1}=names(p);
+%         else
+%             extra{k} = x(b(j));
+%             k=k+1;
+%         end
+%     case 'SG'
+%         if(emptycell(2)==1)
+%             res{2}=names(p);
+%         else
+%             extra{k} = x(b(j));
+%             k=k+1;
+%         end
+%     case 'SF'
+%         if(emptycell(3)==1)
+%             res{3}=names(p);
+%         else
+%             extra{k} = x(b(j));
+%             k=k+1;
+%         end
+%     case 'PF'
+%         if(emptycell(4)==1)
+%             res{4}=names(p);
+%         else
+%             extra{k} = x(b(j));
+%             k=k+1;
+%         end
+%     case 'C'
+%         if(emptycell(5)==1)
+%             res{5}=names(p);
+%         else
+%             extra{k} = x(b(j));
+%             k=k+1;
+%         end
+%   end
 % end
-
+% 
+% %------adding missing players in lineup using same salary-----------------
+% emptycell=cellfun(@isempty,res);             
+% idx=find(emptycell==1);
+% for j=1:length(idx)      % replacing the repeating players
+%   it=1;
+%   for k=1:8
+%    if(~isempty(res{k}))
+%        val(it)=find(strcmp(res{k},names)==1); % current lineuup in indices
+%        it=it+1;
+%    end
+%   end
+%   
+%   oldplayer = extra{j};
+%   
+%   newplayer = switchPlayer(opts.positions{idx(j)}, sal(extra{j}),...
+%     pfp, positions, sal, val);
+%   
+%   res{idx(j)} = names(newplayer);
+%   
+% %   if(newplayer==0)
+% %      b=find(strcmp(opts.positions{idx(j)}, info.positions(myavail)));
+% %      res{idx(j)} = names(myavail(randi(length(b),1)));
+% %   else
+%   
+% end
+ 
 end
  
  
@@ -172,10 +206,10 @@ if(strcmp(oldplayerposition,'PG') || strcmp(oldplayerposition,'SG') || strcmp(ol
  
 newplayerIndex=0;           % just to initialize it and check
 for i=1:length(id)
-   if(newArray(id(i),2)<=oldplayersalary)
-      newplayerIndex = myavail(a(id(i)));
-      break;
-   end
+  if(newArray(id(i),2)<=oldplayersalary)
+    newplayerIndex = myavail(a(id(i)));
+    break;
+  end
 end
 
 else

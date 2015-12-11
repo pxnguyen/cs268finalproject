@@ -56,6 +56,10 @@ for windowSize = 1:10;
   errorsAll(windowSize) = mean(avgErrorPerDay);
 end
 
-plot(1:10, errorsTop50, '-o', 'LineWidth', 2); hold on;
-errorsTop50
-errorsAll
+plot(1:6, errorsTop50(1:6), '-o', 'LineWidth', 2); hold on;
+plot(1:6, errorsAll(1:6), '-x', 'LineWidth', 2);
+xlabel('WindowSize');
+ylabel('Average Error');
+legend({'top50error', 'allerror'});
+grid on
+export_fig('regression_error', '-png', '-m2', '-painters', '-transparent');

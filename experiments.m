@@ -1,6 +1,7 @@
 %% comparing the methods
 projectionMethods = {'average', 'last', 'regression'};
-pickingStrategy = {'average', 'big3', 'adhoc', 'SA'};
+pickingStrategy = {'adhoc', 'SA'};
+%pickingStrategy = {'average', 'big3', 'adhoc', 'SA'};
 
 opts = struct;
 opts.startTestDay = 20;
@@ -24,10 +25,10 @@ end
 
 %% Draft kings
 resultsSet = cell(length(pickingStrategy), length(projectionMethods));
+opts.dataset = 'draftkings';
 for iStrat = 1:length(pickingStrategy)
-  iStrat
   for iProj=1:length(projectionMethods)
-    resname = sprintf('results/draftkings-%s-%s.mat', projectionMethods{iProj}, pickingStrategy{iStrat});
+    resname = sprintf('results/%s-%s-%s.mat', opts.dataset, projectionMethods{iProj}, pickingStrategy{iStrat});
     if exist(resname, 'file')
       continue;
     end
@@ -43,19 +44,20 @@ end
 
 for iStrat = 1:length(pickingStrategy)
   for iProj=1:length(projectionMethods)
-    fprintf('%s-%s', projectionMethods{iProj}, pickingStrategy{iStrat})
     a = load(sprintf('results/fanduel-%s-%s.mat', projectionMethods{iProj}, pickingStrategy{iStrat}));
     a = a.res;
-    mean(a.afp_all)
+    fprintf('%s-%s, projected: %0.2f actual: %0.2f\n', projectionMethods{iProj}, pickingStrategy{iStrat},...
+      mean(a.pfp_all), mean(a.afp_all));
   end
 end
 
 %%
 for iStrat = 1:length(pickingStrategy)
   for iProj=1:length(projectionMethods)
-    fprintf('%s-%s', projectionMethods{iProj}, pickingStrategy{iStrat})
-    a = load(sprintf('results/%s-%s.mat', projectionMethods{iProj}, pickingStrategy{iStrat}));
+    resname = sprintf('results/%s-%s-%s.mat', opts.dataset, projectionMethods{iProj}, pickingStrategy{iStrat});
+    a = load(resname);
     a = a.res;
-    mean(a.afp_all)
+    fprintf('%s-%s, projected: %0.2f actual: %0.2f\n', projectionMethods{iProj}, pickingStrategy{iStrat},...
+      mean(a.pfp_all), mean(a.afp_all));
   end
 end
